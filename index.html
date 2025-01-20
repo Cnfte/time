@@ -1,0 +1,132 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全球时间动态显示</title>
+
+    <!-- 引入 BootCDN 的 Bootstrap 资源 -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0-alpha1/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0-alpha1/js/bootstrap.bundle.min.js"></script>
+
+    <!-- 引入 Bootstrap Icons -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <style>
+        /* 自定义样式 */
+        .tool-card {
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .card-body {
+            padding: 1.25rem;
+        }
+
+        .tool-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .card-footer {
+            text-align: center;
+        }
+
+        .sticky-time {
+            order: -1;
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+<div class="container-fluid">
+    <!-- 顶栏 -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-clock"></i> 时区时间管理
+            </a>
+        </div>
+    </nav>
+
+    <div class="row">
+        <!-- 右侧内容区 -->
+        <div class="col-12 content-area">
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <h2>全球时区当前时间</h2>
+            </div>
+
+            <!-- 时区时间显示区 -->
+            <div id="time-list" class="row mt-4">
+                <!-- 动态生成时区时间项 -->
+                <!-- 这里会通过 JavaScript 动态生成时区时间项 -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const timeZones = Intl.supportedValuesOf('timeZone');
+    const timeList = document.getElementById('time-list');
+
+    function formatTime(date) {
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        return `${hours}:${minutes}:${seconds}`;
+    }
+
+    function createTimeCard(timeZone, localTime) {
+        const timeCard = document.createElement('div');
+        timeCard.className = 'col-12 col-md-4 col-lg-3 mb-4';
+        timeCard.classList.add('tool-card');
+        timeCard.innerHTML = `
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="tool-title">${timeZone}</h5>
+                    <p class="card-text">当前时间: <span class="time-display">${formatTime(localTime)}</span></p>
+                </div>
+                <div class="card-footer text-center">
+                    <small>动态更新时间</small>
+                </div>
+            </div>
+        `;
+        return timeCard;
+    }
+
+    function updateTimes() {
+        const cards = Array.from(timeList.children);
+        cards.forEach(card => {
+            const timeZone = card.querySelector('.tool-title').textContent;
+            const now = new Date().toLocaleString('zh-CN', { timeZone });
+            const localTime = new Date(now);
+            card.querySelector('.time-display').textContent = formatTime(localTime);
+        });
+    }
+
+    function initTimeZones() {
+        const stickyTimeZones = ['Asia/Shanghai'];
+        stickyTimeZones.forEach(timeZone => {
+            const now = new Date().toLocaleString('zh-CN', { timeZone });
+            const localTime = new Date(now);
+            const timeCard = createTimeCard(timeZone, localTime);
+            timeCard.classList.add('sticky-time');
+            timeList.appendChild(timeCard);
+        });
+
+        timeZones.filter(timeZone => !stickyTimeZones.includes(timeZone)).forEach(timeZone => {
+            const now = new Date().toLocaleString('zh-CN', { timeZone });
+            const localTime = new Date(now);
+            const timeCard = createTimeCard(timeZone, localTime);
+            timeList.appendChild(timeCard);
+        });
+    }
+
+    initTimeZones();
+    setInterval(updateTimes, 1000); // 每秒更新一次时区时间
+</script>
+
+</body>
+</html>
